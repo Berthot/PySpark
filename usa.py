@@ -1,18 +1,18 @@
 from SparkBD import SparkBD
 
-spark = SparkBD("airport")
+original = SparkBD("airport")
 
-spark.get_rdd("airports.csv")
+original.get_rdd("airports.csv")
 
-spark.filter(lambda l: l.split(',')[3] == 'United States')
+original.filter(lambda l: l.split(',')[3] == 'United States')
 
-rdd_latitude_filtered = spark.filter(lambda l: float(l.split(',')[6]) > 40)
+rdd_latitude_filtered = original.filter(lambda l: float(l.split(',')[6]) > 40)
 
 rdd_ex1 = rdd_latitude_filtered.map(lambda item: item.upper())
 
-rdd_latitudes = spark.map(lambda l: float(l.split(',')[6]))
+rdd_latitudes = original.map(lambda l: float(l.split(',')[6]))
 
-count = spark.count()
+count = original.count()
 
 _sum = rdd_latitudes.reduce(lambda a, b: a + b)
 
