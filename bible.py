@@ -1,6 +1,6 @@
 from SparkBD import SparkBD
 
-spark = SparkBD("test")
+spark = SparkBD("bible")
 
 rdd = spark.get_rdd("bible.txt")
 

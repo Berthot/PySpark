@@ -15,7 +15,17 @@ class SparkBD:
         self._setup()
         self._setup_samples()
         self.rdd = None
-        self.content = None
+
+    def _get_copy_name(self, file_name):
+        if file_name == '':
+            return f"{self._project_name}_copy"
+        return file_name
+
+    def get_copy(self, file_name):
+        spark = SparkBD(self._get_copy_name(file_name))
+        spark.rdd = self.rdd
+        spark.context = self.context
+        return spark
 
     def get_rdd(self, file_name: str):
         self.rdd = self._context.textFile(f'file://{SparkFiles.get(file_name)}')
@@ -23,11 +33,21 @@ class SparkBD:
     def flatmap(self, *args):
         self.rdd = self.rdd.flatMap(*args)
 
-    def filter(self, *args):
+    def filter(self, *args, copy_name=''):
         self.rdd = self.rdd.filter(*args)
+        return self.get_copy(copy_name)
 
-    def reduce(self, *args):
+    def map(self, *args, copy_name=''):
+        self.rdd = self.rdd.map(*args)
+        return self.get_copy(copy_name)
+
+    def take(self, count: int, active: bool):
+        if active:
+            self.rdd = self.rdd.take(count)
+
+    def reduce(self, *args, copy_name=''):
         self.rdd = self.rdd.reduce(*args)
+        return self.get_copy(copy_name)
 
     def count_by_value(self):
         self.rdd = self.rdd.countByValue()
@@ -51,14 +71,19 @@ class SparkBD:
     def _setup(self, ):
         spark = SparkSession.builder.appName(self._project_name).getOrCreate()
         self._context = spark.sparkContext
+        self._context.setLogLevel("OFF")
 
     def _setup_samples(self):
         for url in [self._base_url + x for x in self._files]:
             self._context.addFile(url)
 
-    def save_rdd_to_file(self, file_name="testando"):
+    def save_rdd_to_file(self, file_name="", coalesce=10):
         name = self._project_name if file_name == "" else file_name
+        self.rdd = self.rdd.coalesce(coalesce)
         file = self._OUT_DIR / name
         if file.exists():
             shutil.rmtree(self._OUT_DIR)
         self.rdd.saveAsTextFile(str(file))
+
+    def count(self):
+        return self.rdd.count()
