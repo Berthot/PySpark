@@ -14,6 +14,6 @@ prdd_usa.map_values(lambda x: x.upper())
 
 # prdd_usa.take(5)
 
-print(prdd_usa)
+# print(prdd_usa)
 
-# prdd_usa.save_rdd_to_file('airport_usa', coalesce=1)
+prdd_usa.save_rdd_to_file('airport_usa', coalesce=1)
