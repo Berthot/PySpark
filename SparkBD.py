@@ -66,7 +66,7 @@ class SparkBD:
 
     @property
     def _base_url(self):
-        return 'http://www.ppgia.pucpr.br/~jean.barddal/bigdata/'
+        return 'https://www.ppgia.pucpr.br/~jean.barddal/bigdata/'
 
     def _setup(self, ):
         spark = SparkSession.builder.appName(self._project_name).getOrCreate()
