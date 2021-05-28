@@ -1,5 +1,6 @@
 import shutil
 from functools import reduce
+from typing import Callable, Any, List
 
 from pyspark import SparkFiles
 from pyspark.sql import SparkSession
@@ -21,7 +22,7 @@ class SparkBD:
             return f"{self._project_name}_copy"
         return file_name
 
-    def get_copy(self, file_name):
+    def get_copy(self, file_name=''):
         spark = SparkBD(self._get_copy_name(file_name))
         spark.rdd = self.rdd
         spark.context = self.context
@@ -29,6 +30,9 @@ class SparkBD:
 
     def get_rdd(self, file_name: str):
         self.rdd = self._context.textFile(f'file://{SparkFiles.get(file_name)}')
+
+    def get_rdd_by_tuple(self, tuples):
+        self.rdd = self._context.parallelize(tuples)
 
     def flatmap(self, *args):
         self.rdd = self.rdd.flatMap(*args)
@@ -41,7 +45,11 @@ class SparkBD:
         self.rdd = self.rdd.map(*args)
         return self.get_copy(copy_name)
 
-    def take(self, count: int, active: bool):
+    def map_values(self, *args, copy_name=''):
+        self.rdd = self.rdd.mapValues(*args)
+        return self.get_copy(copy_name)
+
+    def take(self, count: int, active: bool = True):
         if active:
             self.rdd = self.rdd.take(count)
 
@@ -54,6 +62,12 @@ class SparkBD:
 
     def get_items(self):
         return self.rdd.items()
+
+    def __str__(self):
+        acc = ''
+        for value in self.rdd:
+            acc += str(value) + '\n'
+        return acc
 
     @property
     def _files(self):
@@ -68,7 +82,7 @@ class SparkBD:
     def _base_url(self):
         return 'https://www.ppgia.pucpr.br/~jean.barddal/bigdata/'
 
-    def _setup(self, ):
+    def _setup(self):
         spark = SparkSession.builder.appName(self._project_name).getOrCreate()
         self._context = spark.sparkContext
         self._context.setLogLevel("OFF")
@@ -77,7 +91,7 @@ class SparkBD:
         for url in [self._base_url + x for x in self._files]:
             self._context.addFile(url)
 
-    def save_rdd_to_file(self, file_name="", coalesce=10):
+    def save_rdd_to_file(self, file_name="", coalesce=2):
         name = self._project_name if file_name == "" else file_name
         self.rdd = self.rdd.coalesce(coalesce)
         file = self._OUT_DIR / name
