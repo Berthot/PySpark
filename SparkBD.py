@@ -49,6 +49,14 @@ class SparkBD:
         self.rdd = self.rdd.mapValues(*args)
         return self.get_copy(copy_name)
 
+    def sort_by_key(self, *args, copy_name='', ascending=False):
+        self.rdd = self.rdd.sortByKey(*args, ascending=ascending)
+        return self.get_copy(copy_name)
+
+    def sort_by(self, *args, copy_name='', ascending=False):
+        self.rdd = self.rdd.sortBy(*args, ascending=ascending)
+        return self.get_copy(copy_name)
+
     def take(self, count: int, active: bool = True):
         if active:
             self.rdd = self.rdd.take(count)
