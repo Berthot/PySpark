@@ -57,6 +57,10 @@ class SparkBD:
         self.rdd = self.rdd.reduce(*args)
         return self.get_copy(copy_name)
 
+    def reduce_by_key(self, *args, copy_name=''):
+        self.rdd = self.rdd.reduceByKey(*args)
+        return self.get_copy(copy_name)
+
     def count_by_value(self):
         self.rdd = self.rdd.countByValue()
 
