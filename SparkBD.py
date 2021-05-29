@@ -66,6 +66,12 @@ class SparkBD:
         return self.get_copy(copy_name)
 
     def reduce_by_key(self, *args, copy_name=''):
+        """
+        reduce and keep the same key
+        :param args:
+        :param copy_name:
+        :return:
+        """
         self.rdd = self.rdd.reduceByKey(*args)
         return self.get_copy(copy_name)
 
